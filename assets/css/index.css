@@ -1,0 +1,257 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+:root {
+  --primary-color: #4f5d75;
+  --secondary-color: #ef8354;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  scroll-behavior: smooth;
+}
+
+form {
+  margin-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+form .input {
+  flex: 1;
+  position: relative;
+}
+form .input input {
+  width: 100%;
+  font-size: 1.35rem;
+  padding: 7.5px 10px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px 1px var(--primary-color);
+  border: none;
+  outline: none;
+  color: var(--primary-color);
+  transition: 0.3s ease padding-top, 0.3s ease padding-bottom, 0.3s ease opacity;
+}
+form .input input:focus ~ label,
+form .input input:not(input[value=""]) ~ label {
+  font-size: 0.8rem;
+  top: 0;
+  opacity: 0.9;
+}
+form .input input:focus,
+form .input input:not(input[value=""]) {
+  padding-top: 12.5px;
+  padding-bottom: 2.5px;
+}
+form .input label {
+  font-size: 1.35rem;
+  color: var(--primary-color);
+  position: absolute;
+  top: 7.5px;
+  left: 10px;
+  transition: 0.3s ease font-size, 0.3s ease top;
+  cursor: text;
+}
+form .input p.help {
+  color: var(--primary-color);
+  margin-top: 15px;
+  margin-left: 10px;
+}
+form input[type=submit] {
+  background-color: #fff;
+  outline: none;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  cursor: pointer;
+  border-radius: 25px;
+  padding: 5px 10px;
+  font-size: 1.25rem;
+  margin-left: 15px;
+  transition: 0.3s ease color, 0.3s ease border-color;
+}
+form input[type=submit]:hover {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+body .scanner-window {
+  margin-top: 25px;
+  width: 90%;
+  height: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 25px;
+  border: 3px solid var(--secondary-color);
+  border-radius: 25px;
+}
+body .scanner-window h1 {
+  margin-bottom: 15px;
+  color: var(--secondary-color);
+}
+body .scanner-window .scanner-wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 15px;
+}
+body .scanner-window .scanner-wrapper span.torch {
+  position: absolute;
+  left: 50%;
+  bottom: 25px;
+  transform: translateX(-50%);
+  font-size: 2.5rem;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  display: none;
+}
+body .scanner-window .scanner-wrapper span.torch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  width: 3rem;
+  height: 3rem;
+  background-color: #fff;
+  border-radius: 25px;
+}
+body .scanner-window button,
+body .scanner-window select {
+  margin: 10px 0;
+  background: none;
+  font-size: 1.25rem;
+  padding: 10px 25px;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  border-radius: 25px;
+  transition: 0.3s ease background-color, 0.3s ease color;
+  outline: none;
+  cursor: pointer;
+}
+body .scanner-window button:hover,
+body .scanner-window select:hover {
+  color: var(--primary-color);
+  background-color: var(--secondary-color);
+}
+body .scanner-window button.resume-scan,
+body .scanner-window select.resume-scan {
+  display: none;
+}
+body .scanner-window select {
+  width: 100%;
+  font-size: 1rem;
+  text-align: center;
+}
+body .scanner-window select:hover {
+  color: var(--primary-color);
+  background-color: var(--secondary-color);
+}
+body form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 15px;
+}
+body form input#isbn::-webkit-outer-spin-button,
+body form input#isbn::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+body form h1 {
+  color: var(--secondary-color);
+  margin-bottom: 5px;
+}
+body form .input {
+  width: 80%;
+  margin: 10px 0;
+}
+body form .input input {
+  box-shadow: 0 0 10px 1px var(--secondary-color);
+}
+body form .input label {
+  color: var(--secondary-color);
+}
+body form input[type=submit],
+body form a {
+  margin: 10px 0;
+  background: none;
+  font-size: 1.25rem;
+  padding: 10px 25px;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  border-radius: 25px;
+  transition: 0.3s ease background-color, 0.3s ease color;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+body form input[type=submit]:hover,
+body form a:hover {
+  color: var(--primary-color);
+  background-color: var(--secondary-color);
+}
+body .flashes {
+  z-index: 1;
+}
+
+.flashes {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 25px;
+}
+.flashes .flash {
+  position: relative;
+  width: 350px;
+  min-height: 50px;
+  border: 2px solid var(--primary-color);
+  border-radius: 15px;
+  padding: 25px;
+  color: var(--dark-color);
+  transition: 0.3s ease opacity;
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-top: 10px;
+}
+.flashes .flash.error, .flashes .flash.success {
+  background-color: rgba(186, 24, 27, 0.9);
+}
+.flashes .flash.error span.x, .flashes .flash.success span.x {
+  color: #fff;
+}
+.flashes .flash.error span.x:hover, .flashes .flash.success span.x:hover {
+  color: var(--primary-color);
+}
+.flashes .flash.error p.msg, .flashes .flash.success p.msg {
+  color: #fff;
+}
+.flashes .flash.success {
+  background-color: rgba(56, 176, 0, 0.9);
+}
+.flashes .flash span.x {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  cursor: pointer;
+  transition: 0.3s ease color;
+}
+.flashes .flash span.x:hover {
+  color: var(--secondary-color);
+}
+.flashes .flash p.msg {
+  font-size: 1.1rem;
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digitálna knižnica | Export kníh</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/books.min.css">
+</head>
+<body>
+  <div class="btns">
+    <button onclick="exportBooks();" class="top">Exportovať knihy do CSV súboru</button>
+    <button onclick="clearBooks()" class="bottom">Vymazať knihy z pamäte</button>
+  </div>
+  <div id="books"></div>
+  <div class="btns">
+    <button onclick="exportBooks();" class="bottom">Exportovať knihy do CSV súboru</button>
+    <button onclick="clearBooks()" class="bottom">Vymazať knihy z pamäte</button>
+  </div>
+
+  <script>
+    const exportBooks = () => {
+      let savedBooks = localStorage.getItem("books");
+      if(!savedBooks) {
+        savedBooks = [];
+      } else {
+        savedBooks = JSON.parse(savedBooks);
+      }
+
+      let csv = "data:text/csv;charset=utf-8,Autor,Názov diela, Počet kusov, ISBN, \r\n";
+
+      savedBooks.forEach(book =>{
+        csv += '"' + book.authors + '"' + "," + '"' + book.title + '"' + "," + book.amount + "," + book.isbn + "\r\n";
+      })
+
+      var encUri = encodeURI(csv);
+      window.open(encUri);
+    }
+
+    const clearBooks = () => {
+      if(confirm("Naozaj chcete vymazať knihy z pamäte? Tento krok sa nedá vrátiť späť!")) {
+        localStorage.clear();
+        loadBooks();
+      }
+    }
+
+    const removeBook = (bookId) => {
+      let savedBooks = localStorage.getItem("books");
+      if(!savedBooks) {
+        savedBooks = [];
+      } else {
+        savedBooks = JSON.parse(savedBooks);
+      }
+      const newBooks = savedBooks.filter((el) => el.id !== bookId);
+      localStorage.setItem("books", JSON.stringify(newBooks));
+      loadBooks()
+    }
+
+    const loadBooks = () => {
+      document.getElementById("books").innerHTML = "";
+      let savedBooks = localStorage.getItem("books");
+      if(!savedBooks) {
+        savedBooks = [];
+      } else {
+        savedBooks = JSON.parse(savedBooks);
+      }
+
+      savedBooks.forEach(book => {
+        const bookEl = document.createElement("div");
+        bookEl.classList.add("book");
+        bookEl.innerHTML = `
+          <h1>${book.title}</h1>
+          <h2>${book.authors || "Neznámy autor"}</h2>
+          <div class="numbers">
+            <h3><span>ISBN:</span> ${book.isbn || "???"}</h3>
+            <h3><span>Počet kníh:</span> ${book.amount}</h3>
+          </div>
+          <span class="material-icons" onclick="removeBook(${book.id})">delete</span>
+        `
+        document.getElementById("books").appendChild(bookEl);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadBooks);
+  </script>
+</body>
+</html>

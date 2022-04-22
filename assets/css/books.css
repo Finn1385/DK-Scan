@@ -1,0 +1,99 @@
+:root {
+  --primary-color: #4f5d75;
+  --secondary-color: #ef8354;
+  --dark-color: #2d3142;
+  --box-shadow: 0 0 10px 1px var(--primary-color);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#books {
+  margin: auto;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#books .book {
+  width: 100%;
+  box-shadow: var(--box-shadow);
+  border-radius: 25px;
+  margin: 10px 0;
+  padding: 10px;
+  position: relative;
+  color: var(--dark-color);
+}
+#books .book h1 {
+  font-size: 1.75rem;
+  font-weight: normal;
+}
+#books .book h2 {
+  font-size: 1.25rem;
+  font-weight: normal;
+  color: var(--dark-color);
+  font-style: italic;
+  margin: 5px 0;
+}
+#books .book .numbers {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+#books .book .numbers h3 {
+  font-size: 1.15rem;
+  font-weight: normal;
+  color: var(--dark-color);
+  font-style: italic;
+  margin: 0 10px;
+}
+#books .book .numbers h3 span {
+  font-size: 0.9rem;
+}
+#books .book span.material-icons {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: 0.3s ease color;
+  font-size: 2.25rem;
+}
+#books .book span.material-icons:hover {
+  color: var(--secondary-color);
+}
+
+button {
+  background: #fff;
+  color: var(--secondary-color);
+  font-size: 1.25rem;
+  border: 1px solid var(--secondary-color);
+  border-radius: 15px;
+  padding: 10px 25px;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+button.top {
+  margin: 15px 0 5px;
+}
+button.bottom {
+  margin: 5px 0 15px;
+}
+button:hover {
+  color: var(--primary-color);
+  background: var(--secondary-color);
+}

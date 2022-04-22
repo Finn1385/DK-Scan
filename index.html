@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digitálna knižnica | Skener</title>
+  <script src="assets/js/html5-qrcode.min.js" type="text/javascript"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/index.min.css">
+</head>
+<body>
+  <div class="flashes"></div>
+  <div class="scanner-window">
+    <h1>Skener</h1>
+    <div class="scanner-wrapper">
+      <div id="scanner"></div>
+      <span class="material-icons torch icon">flashlight_on</span>
+    </div>
+    <button class="request-permission">Požiadať povolenie na kameru</button>
+    <button class="resume-scan">Pokračovať v skenovaní</button>
+    <select id="cameras">
+    </select>
+  </div>
+
+  <form id="bookForm">
+    <h1>Nová kniha</h1>
+    <div class="input">
+      <input name="title" id="title" value="" required onkeyup="this.setAttribute('value', this.value)"/>
+      <label for="title">Názov knihy</label>
+    </div>
+    <div class="input">
+      <input name="author" id="authors" value="" onkeyup="this.setAttribute('value', this.value)"/>
+      <label for="author">Meno autora/ov</label>
+    </div>
+    <div class="input">
+      <input name="isbn" id="isbn" type="tel" value="" required onkeyup="this.setAttribute('value', this.value)"/>
+      <label for="isbn">ISBN knihy</label>
+    </div>
+    <div class="input">
+      <input name="amount" id="amount" type="text" min="1" value="" required onkeyup="this.setAttribute('value', this.value.replace(/[^0-9]/g,'')); this.value = this.value.replace(/[^0-9]/g,'');"/>
+      <label for="amount">Počet kníh</label>
+    </div>
+    <input type="submit" value="Pridať knihu">
+    <a href="books.html">Zobraziť všetky knihy</a>
+  </form>
+</body>
+<script>
+  const qrCode = new Html5Qrcode("scanner"); // Permissions
+  const selectElement = document.getElementById("cameras");
+  const qrBox = {width: 250, height: 250};
+
+  let videoSrc;
+  let allCameras;
+  let selectedCameraId;
+  let flashEnabled = false;
+
+  // Load cameras
+  const loadCameras = async () => 
+    await new Promise((resolve, reject) => { 
+      Html5Qrcode.getCameras().then(devices => {
+        const options = []
+        allCameras = devices;
+        for(device of devices) {
+          options.push(`<option value="${device.id}">${device.label}</option>`);
+        }
+        selectElement.innerHTML = options.join();
+        selectedCameraId = allCameras[0].id;
+        resolve(selectedCameraId);
+      })
+    });
+
+  const startCamera = (cameraId = selectedCameraId) => {
+    qrCode.start(
+      cameraId,
+      {
+        fps: 10,
+        qrbox: qrBox,
+        videoConstraints: {
+          deviceId: cameraId,
+        }
+      },
+      (decodedText, decodedResult) => {
+        document.querySelector(".resume-scan").style.display = "block";
+        qrCode.pause();
+        loadBook(decodedText);
+        flashEnabled && toggleFlashlight();
+      }
+    )
+    .then(() => {
+        videoSrc = document.querySelector("#scanner video").srcObject;
+        if(!hasTorch()) {
+          document.querySelector(".material-icons.torch.icon").style.display = "none";
+        } else {
+          document.querySelector(".material-icons.torch.icon").style.display = "block";
+        }
+      })
+    .catch((err) => {
+      alert("Cameru nebolo možné zapnúť. Skúste to znova obnovením stránky. \nChyba: " + err)
+    });
+  }
+
+  const changeCamera = (cameraId) => {
+    if(qrCode.getState() == Html5QrcodeScannerState.SCANNING) {
+      qrCode.stop();
+    }
+    selectedCameraId = cameraId;
+    startCamera(cameraId);
+    flashEnabled = false;
+  }
+
+  const toggleFlashlight = async () => {
+    if(!selectedCameraId) {
+      const camId = await loadCameras();
+      startCamera(camId);
+    }
+
+    if(!hasTorch()) return;
+
+    videoSrc?.getVideoTracks()[0].applyConstraints({
+      advanced: [{torch: !flashEnabled}]
+    })
+    flashEnabled = !flashEnabled;
+    document.querySelector(".material-icons.torch.icon").innerText = flashEnabled ? "flashlight_off" : "flashlight_on";
+  }
+
+  const hasTorch = () => {
+    try {
+      return "torch" in videoSrc?.getVideoTracks()[0].getSettings();
+    } catch {
+      return false;
+    }
+  }
+
+  const loadBook = (isbn) => {
+    document.querySelector("#isbn").value = isbn;
+    document.querySelector("#isbn").setAttribute("value", isbn);
+    document.querySelector("#amount").value = 1;
+    document.querySelector("#amount").setAttribute("value", 1);
+
+    const xmlHttp = new XMLHttpRequest();
+    xmlHttp.addEventListener("readystatechange", function () {
+      if(this.readyState === 4 && this.status === 200) {
+        const response = JSON.parse(this.responseText);
+        if(!response || !response.items) {
+          return;
+        }
+        const bookInfo = response.items[0].volumeInfo;
+        console.log(bookInfo);
+        document.querySelector("#title").value = bookInfo["title"] + " - " + bookInfo["subtitle"];
+        document.querySelector("#title").setAttribute("value", bookInfo["title"] + " - " + bookInfo["subtitle"]);
+        document.querySelector("#authors").value = bookInfo["authors"].join(", ");
+        document.querySelector("#authors").setAttribute("value", bookInfo["authors"].join(", "));
+      }
+    })
+    xmlHttp.open("GET", `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&fields=items/volumeInfo(title,subtitle,authors,publisher,publishedDate,language,industryIdentifiers,description,imageLinks)&maxResults=1`);
+    xmlHttp.send();
+  }
+
+  selectElement.addEventListener("change", (e) => changeCamera(e.target.value));
+  document.querySelector(".resume-scan").addEventListener("click", () => {
+    qrCode.resume();
+    document.querySelector(".resume-scan").style.display = "none";
+  });
+  document.querySelector(".request-permission").addEventListener("click", () => loadCameras());
+  document.querySelector(".material-icons.torch.icon").addEventListener("click", () => toggleFlashlight());
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    if(document.querySelector(".scanner-wrapper").clientWidth < 250) {
+      qrBox.width = document.querySelector(".scanner-wrapper").clientWidth;
+      qrBox.height = document.querySelector(".scanner-wrapper").clientWidth;
+    }
+    
+    const cameraId = await loadCameras();
+    startCamera(cameraId);
+  });
+</script>
+<script>
+  const bookForm = document.getElementById("bookForm");
+  function fadeout(element) {
+    element.style.opacity = 0;
+    setTimeout(() => {
+      element.remove();
+    }, 300);
+  }
+
+  const submitForm = () => {
+    const FD = new FormData(bookForm);
+    let savedBooks = localStorage.getItem("books");
+    if(!savedBooks) {
+      savedBooks = [];
+    } else {
+      savedBooks = JSON.parse(savedBooks);
+    }
+    savedBooks.push({
+      id: new Date().getTime(),
+      title: FD.get("title"),
+      authors: FD.get("author"),
+      isbn: FD.get("isbn"),
+      amount: FD.get("amount")
+    });
+    localStorage.setItem("books", JSON.stringify(savedBooks))
+    flashMessage("Kniha úspešne uložená do pamäte", "success");
+    document.querySelectorAll("input").forEach((el) => {
+      if(el.type === "submit") return;
+      el.value = "";
+      el.setAttribute("value", "");
+    })
+  }
+
+  bookForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submitForm();
+  })
+
+  const flashMessage = (msg, category) => {
+    const flash = document.createElement("div");
+    flash.classList.add("flash");
+    flash.classList.add(category);
+    flash.innerHTML = `
+      <span class="material-icons x" onclick="fadeout(this.parentElement);">close</span>
+      <p class="msg ${category}">${msg}</p>
+    `
+    document.querySelector(".flashes").appendChild(flash);
+  }
+</script>
+</html>
